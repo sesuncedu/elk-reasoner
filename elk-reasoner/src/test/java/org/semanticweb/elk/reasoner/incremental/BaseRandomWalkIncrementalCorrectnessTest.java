@@ -25,13 +25,6 @@ package org.semanticweb.elk.reasoner.incremental;
  * #L%
  */
 
-import static org.junit.Assume.assumeTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +46,13 @@ import org.semanticweb.elk.testing.PolySuite;
 import org.semanticweb.elk.testing.TestInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Base class for unit tests based on the random walk runners
@@ -106,7 +106,7 @@ public abstract class BaseRandomWalkIncrementalCorrectnessTest {
 		Reasoner incrementalReasoner;
 		long seed = RandomSeedProvider.VALUE;
 
-		LOGGER_.info("Initial load of test axioms");
+		LOGGER_.debug("Initial load of test axioms");
 
 		InputStream stream = manifest.getInput().getInputStream();
 		AxiomLoader fileLoader = new Owl2StreamLoader(

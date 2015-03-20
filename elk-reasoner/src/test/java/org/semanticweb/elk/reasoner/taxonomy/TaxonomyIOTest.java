@@ -25,27 +25,13 @@
  */
 package org.semanticweb.elk.reasoner.taxonomy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 import org.junit.Test;
 import org.semanticweb.elk.io.IOUtils;
 import org.semanticweb.elk.loading.AxiomLoader;
 import org.semanticweb.elk.loading.Owl2StreamLoader;
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.owl.implementation.ElkObjectFactoryImpl;
-import org.semanticweb.elk.owl.interfaces.ElkClass;
-import org.semanticweb.elk.owl.interfaces.ElkEntity;
-import org.semanticweb.elk.owl.interfaces.ElkNamedIndividual;
-import org.semanticweb.elk.owl.interfaces.ElkObject;
-import org.semanticweb.elk.owl.interfaces.ElkObjectFactory;
+import org.semanticweb.elk.owl.interfaces.*;
 import org.semanticweb.elk.owl.iris.ElkIri;
 import org.semanticweb.elk.owl.managers.ElkEntityRecycler;
 import org.semanticweb.elk.owl.parsing.Owl2ParseException;
@@ -60,6 +46,13 @@ import org.semanticweb.elk.reasoner.taxonomy.hashing.InstanceTaxonomyHasher;
 import org.semanticweb.elk.reasoner.taxonomy.hashing.TaxonomyHasher;
 import org.semanticweb.elk.reasoner.taxonomy.model.InstanceTaxonomy;
 import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * Tests loading/dumping of taxonomies
@@ -71,7 +64,8 @@ import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
  */
 public class TaxonomyIOTest {
 
-	/**
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaxonomyIOTest.class);
+    /**
 	 * The {@link ElkObjectFactory} used for construction of {@link ElkObject}s.
 	 * In order for {@link MockTaxonomyLoader} to work correctly, the factory
 	 * should identify all {@link ElkEntity} objects.
@@ -123,32 +117,37 @@ public class TaxonomyIOTest {
 		InstanceTaxonomy<ElkClass, ElkNamedIndividual> original = loadAndClassify("io/instance_taxonomy.owl");
 		StringWriter writer = new StringWriter();
 
-		Writer outWriter = new OutputStreamWriter(System.out);
-		TaxonomyPrinter.dumpInstanceTaxomomy(original, outWriter, false);
-		outWriter.flush();
+        debugLogInstanceTaxonomy(original);
 
-		TaxonomyPrinter.dumpInstanceTaxomomy(original, writer, false);
+        TaxonomyPrinter.dumpInstanceTaxomomy(original, writer, false);
 
 		StringReader reader = new StringReader(writer.getBuffer().toString());
 		Owl2Parser parser = parserFactory.getParser(reader);
 		InstanceTaxonomy<ElkClass, ElkNamedIndividual> loaded = MockTaxonomyLoader
 				.load(objectFactory, parser);
 
-		System.out.println("=================================");
-		outWriter = new OutputStreamWriter(System.out);
-		TaxonomyPrinter.dumpInstanceTaxomomy(loaded, outWriter, false);
-		outWriter.flush();
+        LOGGER.debug("=================================");
+        debugLogInstanceTaxonomy(loaded);
 
 		// compare
 		assertEquals(InstanceTaxonomyHasher.hash(original),
 				InstanceTaxonomyHasher.hash(loaded));
 	}
 
-	/*
-	 * Test that reordering classes in EquivalentClasses axioms and replacing a
-	 * class name by an equivalent one in SubClassOf axioms does not break class
-	 * taxonomy equivalence.
-	 */
+    private void debugLogInstanceTaxonomy(InstanceTaxonomy<ElkClass, ElkNamedIndividual> taxonomy) throws IOException {
+        if (LOGGER.isDebugEnabled()) {
+            Writer outWriter = new StringWriter();
+            TaxonomyPrinter.dumpInstanceTaxomomy(taxonomy, outWriter, false);
+            outWriter.flush();
+            LOGGER.debug(outWriter.toString());
+        }
+    }
+
+    /*
+     * Test that reordering classes in EquivalentClasses axioms and replacing a
+     * class name by an equivalent one in SubClassOf axioms does not break class
+     * taxonomy equivalence.
+     */
 	@Test
 	public void taxonomyEquivalence() throws IOException, Owl2ParseException,
 			ElkInconsistentOntologyException {

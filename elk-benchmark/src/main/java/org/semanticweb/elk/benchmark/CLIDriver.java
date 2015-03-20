@@ -44,9 +44,9 @@ public class CLIDriver {
 	 */
 	public static void main(String[] args) throws Exception {
 		BenchmarkUtils.runTask(ClassificationTask.class.getName(),
-				1, 2,
+				1, 10,
 				//new String[]{"/home/pavel/ulm/data/snomed/snomedStated_INT_20130731.owl", "4"});
-				new String[]{"/home/pavel/tmp/ore-elk-wrong/00757.owl", "4"});
+				new String[]{"/Users/ses/src/Semantic/GO-cache/src/test/resources/gene_ontology_write.ofn", "4"});
 		/*BenchmarkUtils.runTaskCollection2(IncrementalClassificationMultiDeltas.class.getName(),
 				0, 1,
 				new String[]{"/home/pavel/ulm/data/snomed/incremental-1", "4"});*/

@@ -22,9 +22,6 @@ package org.semanticweb.elk.reasoner.indexing.implementation;
  * #L%
  */
 
-import java.util.List;
-import java.util.Set;
-
 import org.semanticweb.elk.reasoner.indexing.caching.CachedIndexedClassExpressionFilter;
 import org.semanticweb.elk.reasoner.indexing.caching.CachedIndexedObjectUnionOf;
 import org.semanticweb.elk.reasoner.indexing.modifiable.ModifiableIndexedClassExpression;
@@ -38,6 +35,9 @@ import org.semanticweb.elk.util.logging.LogLevel;
 import org.semanticweb.elk.util.logging.LoggerWrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implements {@link CachedIndexedObjectUnionOf}
@@ -101,10 +101,10 @@ class CachedIndexedObjectUnionOfImpl extends
 
 		if (positiveOccurrenceNo == 0 && increment.positiveIncrement > 0) {
 			// first positive occurrence of this expression
-			if (LOGGER_.isWarnEnabled()) {
+			if (LOGGER_.isDebugEnabled()) {
 				LoggerWrap
 						.log(LOGGER_,
-								LogLevel.WARN,
+								LogLevel.DEBUG,
 								"reasoner.indexing.IndexedObjectUnionOf",
 								"ELK does not support positive occurrences of ObjectUnionOf. Reasoning might be incomplete!");
 			}

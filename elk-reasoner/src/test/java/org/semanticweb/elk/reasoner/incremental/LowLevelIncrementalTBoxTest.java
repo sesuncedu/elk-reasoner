@@ -25,32 +25,11 @@ package org.semanticweb.elk.reasoner.incremental;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
 import org.semanticweb.elk.io.IOUtils;
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.owl.implementation.ElkObjectFactoryImpl;
-import org.semanticweb.elk.owl.interfaces.ElkAxiom;
-import org.semanticweb.elk.owl.interfaces.ElkClass;
-import org.semanticweb.elk.owl.interfaces.ElkObjectFactory;
-import org.semanticweb.elk.owl.interfaces.ElkObjectProperty;
-import org.semanticweb.elk.owl.interfaces.ElkSubClassOfAxiom;
+import org.semanticweb.elk.owl.interfaces.*;
 import org.semanticweb.elk.owl.iris.ElkFullIri;
 import org.semanticweb.elk.owl.iris.ElkPrefix;
 import org.semanticweb.elk.owl.parsing.Owl2ParseException;
@@ -62,6 +41,15 @@ import org.semanticweb.elk.reasoner.TestReasonerUtils;
 import org.semanticweb.elk.reasoner.stages.LoggingStageExecutor;
 import org.semanticweb.elk.reasoner.stages.PostProcessingStageExecutor;
 import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Pavel Klinov
@@ -71,7 +59,7 @@ import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
  * @author "Yevgeny Kazakov"
  */
 public class LowLevelIncrementalTBoxTest {
-
+   private static Logger LOGGER = LoggerFactory.getLogger(LowLevelIncrementalTBoxTest.class);
 	final ElkObjectFactory objectFactory = new ElkObjectFactoryImpl();
 
 	@Test
@@ -429,7 +417,7 @@ public class LowLevelIncrementalTBoxTest {
 			assertSame(taxonomy.getBottomNode(),
 					taxonomy.getNode(maternityKangaroo));
 
-			System.out.println("\n\n\n\n========DELETIONS======");
+			LOGGER.debug("\n\n\n\n========DELETIONS======");
 
 			reasoner.setAllowIncrementalMode(true);
 			TestChangesLoader changeLoader = new TestChangesLoader();
@@ -444,7 +432,7 @@ public class LowLevelIncrementalTBoxTest {
 			assertNotSame(taxonomy.getBottomNode(),
 					taxonomy.getNode(maternityKangaroo));
 
-			System.out.println("\n\n\n\n========ADDING BACK======");
+			LOGGER.debug("\n\n\n\n========ADDING BACK======");
 
 			reasoner.setAllowIncrementalMode(true);
 			reasoner.registerAxiomLoader(changeLoader);
@@ -599,13 +587,13 @@ public class LowLevelIncrementalTBoxTest {
 
 		changeLoader.remove(axiom1);
 
-		System.out.println("===========================================");
+		LOGGER.debug("===========================================");
 
 		reasoner.getTaxonomy();
 
 		changeLoader.remove(axiom2).remove(axiom3);
 
-		System.out.println("===========================================");
+        LOGGER.debug("===========================================");
 
 		reasoner.getTaxonomy();
 	}
@@ -646,8 +634,7 @@ public class LowLevelIncrementalTBoxTest {
 
 		changeLoader.remove(disjCB);
 
-		System.out
-				.println("\n\n\n\n\n===========================================");
+		LOGGER.debug("\n\n\n\n\n===========================================");
 
 		taxonomy = reasoner.getTaxonomy();
 
@@ -939,7 +926,7 @@ public class LowLevelIncrementalTBoxTest {
 
 		changeLoader.remove(toDelete).add(toAdd1).add(toAdd2);
 
-		System.out.println("\n\n\n\n\n");
+        LOGGER.debug("\n\n\n\n\n");
 
 		taxonomy = reasoner.getTaxonomy();
 
@@ -1068,8 +1055,7 @@ public class LowLevelIncrementalTBoxTest {
 				.contains(taxonomy.getNode(F)));
 		// at this point there is a backward link from B1 to A, and a (negative)
 		// subsumer R some C1 for A
-		System.out
-				.println("\n\n\n\n===========================================");
+        LOGGER.debug("\n\n\n\n===========================================");
 		// The subsumer R some C1 already exists, so it won't be processed
 		// (decomposed) for A again
 		// as a result, there won't be a backward link from C1 to A
@@ -1089,8 +1075,7 @@ public class LowLevelIncrementalTBoxTest {
 
 		taxonomy = reasoner.getTaxonomy();
 
-		System.out
-				.println("\n\n\n\n===========================================");
+        LOGGER.debug("\n\n\n\n===========================================");
 		// this leads to cleaning of A so the backward link A <-R<- B1 will be
 		// deleted
 		String toDelete = "Prefix(:=<http://www.test.com/schema#>) Ontology(\n"
@@ -1105,8 +1090,7 @@ public class LowLevelIncrementalTBoxTest {
 
 		taxonomy = reasoner.getTaxonomy();
 
-		System.out
-				.println("\n\n\n\n===========================================");
+        LOGGER.debug("\n\n\n\n===========================================");
 
 		toDelete = "Prefix(:=<http://www.test.com/schema#>) Ontology(\n"
 				+ "SubClassOf(:D ObjectSomeValuesFrom(:R :A)) " + ")";

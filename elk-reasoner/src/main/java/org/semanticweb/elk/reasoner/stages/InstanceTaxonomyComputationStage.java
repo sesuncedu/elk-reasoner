@@ -69,8 +69,8 @@ class InstanceTaxonomyComputationStage extends AbstractReasonerStage {
 					reasoner.instanceTaxonomyState.getTaxonomy());
 		}
 
-		if (LOGGER_.isInfoEnabled()) {
-			LOGGER_.info(getName() + " using " + workerNo + " workers");
+		if (LOGGER_.isDebugEnabled()) {
+			LOGGER_.debug(getName() + " using " + workerNo + " workers");
 		}
 
 		return true;

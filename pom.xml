@@ -107,27 +107,28 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.11</version>
+				<version>4.12</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.5</version>
+				<version>[1.7.5,1.8)</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.5</version>
+				<version>[1.7.5,1.8)</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.5</version>
+				<version>[1.7.5,1.8)</version>
 			</dependency>
 			<dependency>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
-				<version>1.2.14</version>
+				<version>1.2.17</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -137,7 +138,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
-				<version>1.0.13</version>
+				<version>1.1.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -153,21 +154,14 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.10.1</version>
+
 				<configuration>
 					<show>public</show>
 					<!--aggregate>true</aggregate-->
-					<executions>
-				          <execution>
-				            <id>aggregate</id>
-				            <goals>
-				              <goal>aggregate</goal>
-				            </goals>
-				            <phase>site</phase>
-				          </execution>
-				        </executions>
 					<maxmemory>2g</maxmemory>
 					<minmemory>128m</minmemory>
 				</configuration>
+
 			</plugin>
 		</plugins>
 	</reporting>
@@ -205,9 +199,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<owlapi.version>3.4.5</owlapi.version>
-		<!--protege.version>5.0.0-beta-05-SNAPSHOT</protege.version-->
-		<protege.version>4.3.0</protege.version>
+		<owlapi.version>[3.5,3.6)</owlapi.version>
+		<protege.version>[5.0.0-beta-05,6)</protege.version>
+		<!--<protege.version>4.3.0</protege.version>   -->
 		<java.required.version>1.6</java.required.version>
 		<!-- TODO: get current year automatically -->
 		<currentYear>2015</currentYear>

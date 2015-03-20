@@ -22,10 +22,6 @@
  */
 package org.semanticweb.elk.reasoner.stages;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.semanticweb.elk.loading.AxiomLoader;
 import org.semanticweb.elk.loading.ComposedAxiomLoader;
 import org.semanticweb.elk.loading.ElkLoadingException;
@@ -44,13 +40,7 @@ import org.semanticweb.elk.reasoner.indexing.conversion.ElkAxiomConverter;
 import org.semanticweb.elk.reasoner.indexing.conversion.ElkAxiomConverterImpl;
 import org.semanticweb.elk.reasoner.indexing.conversion.ElkPolarityExpressionConverter;
 import org.semanticweb.elk.reasoner.indexing.conversion.ElkPolarityExpressionConverterImpl;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.ChangeIndexingProcessor;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.DifferentialIndex;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.IndexedClass;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.IndexedClassExpression;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.IndexedIndividual;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.NonIncrementalElkAxiomVisitor;
-import org.semanticweb.elk.reasoner.indexing.hierarchy.OntologyIndex;
+import org.semanticweb.elk.reasoner.indexing.hierarchy.*;
 import org.semanticweb.elk.reasoner.saturation.SaturationState;
 import org.semanticweb.elk.reasoner.saturation.SaturationStateFactory;
 import org.semanticweb.elk.reasoner.saturation.SaturationStatistics;
@@ -63,13 +53,7 @@ import org.semanticweb.elk.reasoner.saturation.tracing.OnDemandTracingReader;
 import org.semanticweb.elk.reasoner.saturation.tracing.RecursiveTraceUnwinder;
 import org.semanticweb.elk.reasoner.saturation.tracing.TraceState;
 import org.semanticweb.elk.reasoner.saturation.tracing.TraceStore;
-import org.semanticweb.elk.reasoner.taxonomy.ConcurrentClassTaxonomy;
-import org.semanticweb.elk.reasoner.taxonomy.ConcurrentInstanceTaxonomy;
-import org.semanticweb.elk.reasoner.taxonomy.OrphanInstanceNode;
-import org.semanticweb.elk.reasoner.taxonomy.OrphanNode;
-import org.semanticweb.elk.reasoner.taxonomy.OrphanTypeNode;
-import org.semanticweb.elk.reasoner.taxonomy.SingletoneInstanceTaxonomy;
-import org.semanticweb.elk.reasoner.taxonomy.SingletoneTaxonomy;
+import org.semanticweb.elk.reasoner.taxonomy.*;
 import org.semanticweb.elk.reasoner.taxonomy.model.InstanceTaxonomy;
 import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
 import org.semanticweb.elk.util.collections.ArrayHashSet;
@@ -77,14 +61,18 @@ import org.semanticweb.elk.util.concurrent.computation.ComputationExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+
 /**
  * The execution state of the reasoner containing information about which
  * reasoning stages have been completed and holding the results of these
  * reasoning stages, such as the consistency status of the ontology, class, or
  * instance taxonomy.
- * 
+ *
  * @author "Yevgeny Kazakov"
- * 
+ *
  */
 public abstract class AbstractReasonerState {
 
@@ -110,7 +98,7 @@ public abstract class AbstractReasonerState {
 	 * Accumulated statistics regarding produced conclusions and rule
 	 * applications. Stored here because more than one stage can apply inference
 	 * rules (e.g. during incremental reasoning).
-	 * 
+	 *
 	 * TODO Better to hide this behind a common interface? Then we can uniformly
 	 * maintain aggregated stats of different kinds produced by different
 	 * computations across multiple stages
@@ -213,8 +201,8 @@ public abstract class AbstractReasonerState {
 		}
 		setAllowIncrementalTaxonomy(allow);
 
-		if (LOGGER_.isInfoEnabled()) {
-			LOGGER_.info("Incremental mode is "
+		if (LOGGER_.isDebugEnabled()) {
+			LOGGER_.debug("Incremental mode is "
 					+ (allow ? "allowed" : "disallowed"));
 		}
 	}
@@ -265,7 +253,7 @@ public abstract class AbstractReasonerState {
 	/**
 	 * Forces loading of all axioms from the registered {@link AxiomLoader}s.
 	 * Typically, loading lazily when reasoning tasks are requested.
-	 * 
+	 *
 	 * @throws ElkLoadingException
 	 *             if axioms cannot be loaded
 	 */
@@ -342,7 +330,7 @@ public abstract class AbstractReasonerState {
 
 	/**
 	 * Check consistency of the current ontology, if this has not been done yet.
-	 * 
+	 *
 	 * @return {@code true} if the ontology is inconsistent, that is,
 	 *         unsatisfiable.
 	 * @throws ElkException
@@ -367,7 +355,7 @@ public abstract class AbstractReasonerState {
 
 	/**
 	 * Forces the reasoner to load the axioms (deletions and additions)
-	 * 
+	 *
 	 * @throws ElkException
 	 *             if the reasoning process cannot be completed successfully
 	 */
@@ -388,7 +376,7 @@ public abstract class AbstractReasonerState {
 	/**
 	 * Compute the inferred taxonomy of the named classes for the given ontology
 	 * if it has not been done yet.
-	 * 
+	 *
 	 * @return the class taxonomy implied by the current ontology
 	 * @throws ElkInconsistentOntologyException
 	 *             if the ontology is inconsistent
@@ -420,7 +408,7 @@ public abstract class AbstractReasonerState {
 	/**
 	 * Compute the inferred taxonomy of the named classes for the given ontology
 	 * if it has not been done yet.
-	 * 
+	 *
 	 * @return the class taxonomy implied by the current ontology
 	 * @throws ElkException
 	 *             if the reasoning process cannot be completed successfully
@@ -432,7 +420,7 @@ public abstract class AbstractReasonerState {
 		try {
 			result = getTaxonomy();
 		} catch (ElkInconsistentOntologyException e) {
-			LOGGER_.info("Ontology is inconsistent");
+			LOGGER_.debug("Ontology is inconsistent");
 
 			OrphanNode<ElkClass> node = new OrphanNode<ElkClass>(
 					getAllClasses(), PredefinedElkClass.OWL_NOTHING);
@@ -446,7 +434,7 @@ public abstract class AbstractReasonerState {
 	/**
 	 * Compute the inferred taxonomy of the named classes with instances if this
 	 * has not been done yet.
-	 * 
+	 *
 	 * @return the instance taxonomy implied by the current ontology
 	 * @throws ElkInconsistentOntologyException
 	 *             if the ontology is inconsistent
@@ -478,7 +466,7 @@ public abstract class AbstractReasonerState {
 	/**
 	 * Compute the inferred taxonomy of the named classes with instances if this
 	 * has not been done yet.
-	 * 
+	 *
 	 * @return the instance taxonomy implied by the current ontology
 	 * @throws ElkException
 	 *             if the reasoning process cannot be completed successfully
@@ -491,7 +479,7 @@ public abstract class AbstractReasonerState {
 		try {
 			result = getInstanceTaxonomy();
 		} catch (ElkInconsistentOntologyException e) {
-			LOGGER_.info("Ontology is inconsistent");
+			LOGGER_.debug(" is inconsistent");
 			OrphanTypeNode<ElkClass, ElkNamedIndividual> node = new OrphanTypeNode<ElkClass, ElkNamedIndividual>(
 					getAllClasses(), PredefinedElkClass.OWL_NOTHING, 1);
 			Set<ElkNamedIndividual> allNamedIndividuals = getAllNamedIndividuals();

@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Basically an adapter from {@link ElkAxiomIndexingVisitor} to
+ * Basically an adapter from {@link org.semanticweb.elk.reasoner.indexing.conversion.ElkAxiomConverter} to
  * {@link ElkAxiomProcessor} specifically for classes which index axioms.
  * 
  * @author Pavel Klinov
@@ -72,8 +72,8 @@ public class ChangeIndexingProcessor implements ElkAxiomProcessor {
 						+ " for " + type_);
 			elkAxiom.accept(indexer_);
 		} catch (ElkIndexingUnsupportedException e) {
-			if (LOGGER_.isWarnEnabled()) {
-				LoggerWrap.log(LOGGER_, LogLevel.WARN,
+			if (LOGGER_.isDebugEnabled()) {
+				LoggerWrap.log(LOGGER_, LogLevel.DEBUG,
 						"reasoner.indexing.axiomIgnored", e.getMessage()
 								+ " Axiom ignored:\n"
 								+ OwlFunctionalStylePrinter.toString(elkAxiom));

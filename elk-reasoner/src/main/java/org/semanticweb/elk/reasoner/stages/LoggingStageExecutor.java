@@ -22,6 +22,7 @@
  */
 package org.semanticweb.elk.reasoner.stages;
 
+import org.semanticweb.elk.util.logging.LogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.semanticweb.elk.owl.exceptions.ElkException;
@@ -47,7 +48,7 @@ public class LoggingStageExecutor extends AbstractStageExecutor {
 			LOGGER_.debug(stage.getName() + " stage:");
 		}
 
-		Statistics.logOperationStart(stage.getName(), LOGGER_);
+		Statistics.logOperationStart(stage.getName(), LOGGER_,LogLevel.DEBUG);
 		
 		try {
 			stage.preExecute();
@@ -56,8 +57,8 @@ public class LoggingStageExecutor extends AbstractStageExecutor {
 			LOGGER_.debug(stage.getName() + " was interrupted.");
 			throw e;
 		} finally {
-			Statistics.logOperationFinish(stage.getName(), LOGGER_);
-			Statistics.logMemoryUsage(LOGGER_);
+			Statistics.logOperationFinish(stage.getName(), LOGGER_, LogLevel.DEBUG);
+			Statistics.logMemoryUsage(LOGGER_,LogLevel.DEBUG);
 			stage.printInfo();
 			stage.postExecute();
 		}

@@ -25,11 +25,6 @@
  */
 package org.semanticweb.elk.owlapi;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.semanticweb.elk.loading.ElkLoadingException;
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.owl.exceptions.ElkRuntimeException;
@@ -37,54 +32,29 @@ import org.semanticweb.elk.owl.implementation.ElkObjectFactoryImpl;
 import org.semanticweb.elk.owl.interfaces.ElkClass;
 import org.semanticweb.elk.owl.interfaces.ElkObjectFactory;
 import org.semanticweb.elk.owlapi.wrapper.OwlConverter;
-import org.semanticweb.elk.reasoner.DummyProgressMonitor;
-import org.semanticweb.elk.reasoner.ElkUnsupportedReasoningTaskException;
-import org.semanticweb.elk.reasoner.ProgressMonitor;
-import org.semanticweb.elk.reasoner.Reasoner;
-import org.semanticweb.elk.reasoner.ReasonerFactory;
+import org.semanticweb.elk.reasoner.*;
 import org.semanticweb.elk.reasoner.config.ReasonerConfiguration;
 import org.semanticweb.elk.reasoner.stages.LoggingStageExecutor;
 import org.semanticweb.elk.reasoner.stages.ReasonerStageExecutor;
 import org.semanticweb.elk.util.logging.LogLevel;
 import org.semanticweb.elk.util.logging.LoggerWrap;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.AxiomNotInProfileException;
-import org.semanticweb.owlapi.reasoner.BufferingMode;
-import org.semanticweb.owlapi.reasoner.ClassExpressionNotInProfileException;
-import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
-import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
-import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
-import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
-import org.semanticweb.owlapi.reasoner.InferenceType;
-import org.semanticweb.owlapi.reasoner.Node;
-import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
-import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-import org.semanticweb.owlapi.reasoner.TimeOutException;
-import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.*;
+import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNode;
+import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * {@link OWLReasoner} interface implementation for ELK {@link Reasoner}
- * 
+ *
  * @author Yevgeny Kazakov
  * @author Markus Kroetzsch
  */
@@ -225,7 +195,7 @@ public class ElkReasoner implements OWLReasoner {
 
 	/**
 	 * Logs a warning message for unsupported OWL API method
-	 * 
+	 *
 	 * @param method
 	 *            the method which is not supported
 	 * @return the {@link UnsupportedOperationException} saying that this method
@@ -242,13 +212,13 @@ public class ElkReasoner implements OWLReasoner {
 		 * message type to make it easier to ignore them.
 		 */
 		LoggerWrap.log(LOGGER_, LogLevel.WARN, "owlapi.unsupportedMethod", message);
-		
+
 		return new UnsupportedOperationException(message);
 	}
 
 	/**
 	 * Logs a warning message for unsupported case of an OWL API method
-	 * 
+	 *
 	 * @param method
 	 *            the method which some case is not supported
 	 * @param reason
@@ -261,7 +231,7 @@ public class ElkReasoner implements OWLReasoner {
 		String message = "OWL API reasoner method is not fully implemented: "
 				+ method + ": " + reason;
 		LoggerWrap.log(LOGGER_, LogLevel.WARN, "owlapi.unsupportedMethod", message);
-		
+
 		return new UnsupportedOperationException(message);
 	}
 
@@ -277,7 +247,7 @@ public class ElkReasoner implements OWLReasoner {
 	}
 
 	/**
-	 * 
+	 *
 	 * @throws ReasonerInterruptedException
 	 *             if the reasoner is in the interrupted state, throws
 	 */
@@ -313,9 +283,9 @@ public class ElkReasoner implements OWLReasoner {
 	@Override
 	public void flush() {
 		LOGGER_.debug("flush()");
-		
+
 		checkInterrupted();
-		
+
 		try {
 			if (ontologyReloadRequired_) {
 				reCreateReasoner();
@@ -347,9 +317,9 @@ public class ElkReasoner implements OWLReasoner {
 	@Override
 	public Node<OWLClass> getBottomClassNode() {
 		LOGGER_.debug("getBottomClassNode()");
-		
+
 		checkInterrupted();
-		
+
 		try {
 			return getClassNode(objectFactory_.getOwlNothing());
 		} catch (ElkUnsupportedReasoningTaskException e) {
@@ -363,27 +333,9 @@ public class ElkReasoner implements OWLReasoner {
 	}
 
 	@Override
-	public Node<OWLDataProperty> getBottomDataPropertyNode() {
-		LOGGER_.debug("getBottomDataPropertyNode()");
-		
-		checkInterrupted();
-		// TODO Provide implementation
-		throw unsupportedOwlApiMethod("getBottomDataPropertyNode()");
-	}
-
-	@Override
-	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-		LOGGER_.debug("getBottomObjectPropertyNode()");
-		
-		checkInterrupted();
-		// TODO Provide implementation
-		throw unsupportedOwlApiMethod("getBottomObjectPropertyNode()");
-	}
-
-	@Override
 	public BufferingMode getBufferingMode() {
 		LOGGER_.debug("getBufferingMode()");
-		
+
 		return isBufferingMode_ ? BufferingMode.BUFFERING
 				: BufferingMode.NON_BUFFERING;
 	}
@@ -394,7 +346,7 @@ public class ElkReasoner implements OWLReasoner {
 			FreshEntitiesException, ReasonerInterruptedException,
 			TimeOutException {
 		LOGGER_.debug("getDataPropertyDomains(OWLDataProperty, boolean)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDataPropertyDomains(OWLDataProperty, boolean)");
@@ -406,7 +358,7 @@ public class ElkReasoner implements OWLReasoner {
 			FreshEntitiesException, ReasonerInterruptedException,
 			TimeOutException {
 		LOGGER_.debug("getDataPropertyValues(OWLNamedIndividual, OWLDataProperty)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDataPropertyValues(OWLNamedIndividual, OWLDataProperty)");
@@ -418,7 +370,7 @@ public class ElkReasoner implements OWLReasoner {
 			FreshEntitiesException, ReasonerInterruptedException,
 			TimeOutException {
 		LOGGER_.debug("getDifferentIndividuals(OWLNamedIndividual)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDifferentIndividuals(OWLNamedIndividual)");
@@ -429,7 +381,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws ReasonerInterruptedException, TimeOutException,
 			FreshEntitiesException, InconsistentOntologyException {
 		LOGGER_.debug("getDisjointClasses(OWLClassExpression)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDisjointClasses(OWLClassExpression)");
@@ -441,7 +393,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getDisjointDataProperties(OWLDataPropertyExpression)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDisjointDataProperties(OWLDataPropertyExpression)");
@@ -453,7 +405,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getDisjointObjectProperties(OWLObjectPropertyExpression)");
-	
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getDisjointObjectProperties(OWLObjectPropertyExpression)");
@@ -465,7 +417,7 @@ public class ElkReasoner implements OWLReasoner {
 			ClassExpressionNotInProfileException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getEquivalentClasses(OWLClassExpression)");
-		
+
 		checkInterrupted();
 		try {
 			return elkConverter_.convertClassNode(reasoner_
@@ -486,7 +438,7 @@ public class ElkReasoner implements OWLReasoner {
 			FreshEntitiesException, ReasonerInterruptedException,
 			TimeOutException {
 		LOGGER_.debug("getEquivalentDataProperties(OWLDataProperty)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getEquivalentDataProperties(OWLDataProperty)");
@@ -498,7 +450,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getEquivalentObjectProperties(OWLObjectPropertyExpression)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getEquivalentObjectProperties(OWLObjectPropertyExpression)");
@@ -507,7 +459,7 @@ public class ElkReasoner implements OWLReasoner {
 	@Override
 	public FreshEntityPolicy getFreshEntityPolicy() {
 		LOGGER_.debug("getFreshEntityPolicy()");
-		
+
 		return reasoner_.getAllowFreshEntities() ? FreshEntityPolicy.ALLOW
 				: FreshEntityPolicy.DISALLOW;
 	}
@@ -515,7 +467,7 @@ public class ElkReasoner implements OWLReasoner {
 	@Override
 	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
 		LOGGER_.debug("getIndividualNodeSetPolicy()");
-		
+
 		return IndividualNodeSetPolicy.BY_NAME;
 	}
 
@@ -525,7 +477,7 @@ public class ElkReasoner implements OWLReasoner {
 			ClassExpressionNotInProfileException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getInstances(OWLClassExpression, boolean)");
-		
+
 		checkInterrupted();
 		try {
 			return elkConverter_.convertIndividualNodes(reasoner_.getInstances(
@@ -546,7 +498,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getInverseObjectProperties(OWLObjectPropertyExpression)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getInverseObjectProperties(OWLObjectPropertyExpression)");
@@ -558,7 +510,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getObjectPropertyDomains(OWLObjectPropertyExpression, boolean)");
-			
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getObjectPropertyDomains(OWLObjectPropertyExpression, boolean)");
@@ -570,7 +522,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getObjectPropertyRanges(OWLObjectPropertyExpression, boolean)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getObjectPropertyRanges(OWLObjectPropertyExpression, boolean)");
@@ -582,7 +534,7 @@ public class ElkReasoner implements OWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		LOGGER_.debug("getObjectPropertyValues(OWLNamedIndividual, OWLObjectPropertyExpression)");
-		
+
 		checkInterrupted();
 		// TODO Provide implementation
 		throw unsupportedOwlApiMethod("getObjectPropertyValues(OWLNamedIndividual, OWLObjectPropertyExpression)");
@@ -630,7 +582,7 @@ public class ElkReasoner implements OWLReasoner {
 		if (versionString != null) {
 			splitted = versionString.split("\\.");
 			while (filled < splitted.length) {
-				version[filled] = Integer.parseInt(splitted[filled]);
+				version[filled] = parseInt(splitted[filled]);
 				filled++;
 			}
 		}
@@ -639,6 +591,24 @@ public class ElkReasoner implements OWLReasoner {
 			filled++;
 		}
 		return new Version(version[0], version[1], version[2], version[3]);
+	}
+
+	/**
+	 * parse decimal integer from a string.  Behaviour is different from {Integer.parseInt(String)} in that it
+	 * ignores trailing characters that are non-digits (eg 1-SNAPSHOT)
+	 * @param string
+	 * @return  integer value of string up to first non digit character
+	 */
+	private static int parseInt(String string) {
+		int result =0;
+		for(int i =0;i<string.length();i++) {
+            char c = string.charAt(i);
+            if(!Character.isDigit(c)) {
+                break;
+            }
+            result = (result * 10) + (c - '0');
+        }
+		return result;
 	}
 
 	@Override
@@ -767,21 +737,56 @@ public class ElkReasoner implements OWLReasoner {
 
 	@Override
 	public Node<OWLDataProperty> getTopDataPropertyNode() {
-		LOGGER_.debug("getTopDataPropertyNode()");
+		LOGGER_.debug("faux getTopDataPropertyNode()");
 		checkInterrupted();
 		// TODO Provide implementation
-		throw unsupportedOwlApiMethod("getTopDataPropertyNode()");
+		if(true) {
+			return  OWLDataPropertyNode.getTopNode();
+		} else {
+            throw unsupportedOwlApiMethod("getTopDataPropertyNode()");
+        }
+
 	}
 
 	@Override
 	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-		LOGGER_.debug("getTopObjectPropertyNode()");
+		LOGGER_.debug("faux getTopObjectPropertyNode()");
 		checkInterrupted();
 		// TODO Provide implementation
-		throw unsupportedOwlApiMethod("getTopObjectPropertyNode()");
+		if(true) {
+			return OWLObjectPropertyNode.getTopNode();
+		}  else {
+            throw unsupportedOwlApiMethod("getTopObjectPropertyNode()");
+        }
 	}
 
-	@Override
+    @Override
+    public Node<OWLDataProperty> getBottomDataPropertyNode() {
+        LOGGER_.debug("faux getBottomDataPropertyNode()");
+
+        checkInterrupted();
+        // TODO Provide implementation
+        if(true) {
+            return  OWLDataPropertyNode.getBottomNode();
+        } else {
+            throw unsupportedOwlApiMethod("getBottomDataPropertyNode()");
+        }
+    }
+
+    @Override
+    public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
+        LOGGER_.debug("faux getBottomObjectPropertyNode()");
+
+        checkInterrupted();
+        // TODO Provide implementation
+        if(true) {
+            return OWLObjectPropertyNode.getBottomNode();
+        }  else {
+            throw unsupportedOwlApiMethod("getBottomObjectPropertyNode()");
+        }
+    }
+
+    @Override
 	public NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct)
 			throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
@@ -942,7 +947,7 @@ public class ElkReasoner implements OWLReasoner {
 
 				if (!change.isAxiomChange()) {
 					LOGGER_.trace("Non-axiom change: {}\n The ontology will be reloaded.", change);
-					
+
 					// cannot handle non-axiom changes incrementally
 					ontologyReloadRequired_ = true;
 				} else {

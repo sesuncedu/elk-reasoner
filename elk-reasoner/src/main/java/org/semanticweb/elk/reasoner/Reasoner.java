@@ -22,20 +22,12 @@
  */
 package org.semanticweb.elk.reasoner;
 
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.semanticweb.elk.loading.AbstractAxiomLoader;
 import org.semanticweb.elk.loading.AxiomLoader;
 import org.semanticweb.elk.loading.ElkLoadingException;
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.owl.implementation.ElkObjectFactoryImpl;
-import org.semanticweb.elk.owl.interfaces.ElkAxiom;
-import org.semanticweb.elk.owl.interfaces.ElkClass;
-import org.semanticweb.elk.owl.interfaces.ElkClassExpression;
-import org.semanticweb.elk.owl.interfaces.ElkNamedIndividual;
-import org.semanticweb.elk.owl.interfaces.ElkObject;
-import org.semanticweb.elk.owl.interfaces.ElkObjectFactory;
+import org.semanticweb.elk.owl.interfaces.*;
 import org.semanticweb.elk.owl.iris.ElkFullIri;
 import org.semanticweb.elk.owl.predefined.PredefinedElkClass;
 import org.semanticweb.elk.owl.printers.OwlFunctionalStylePrinter;
@@ -45,17 +37,13 @@ import org.semanticweb.elk.reasoner.config.ReasonerConfiguration;
 import org.semanticweb.elk.reasoner.indexing.hierarchy.OntologyIndex;
 import org.semanticweb.elk.reasoner.stages.AbstractReasonerState;
 import org.semanticweb.elk.reasoner.stages.ReasonerStageExecutor;
-import org.semanticweb.elk.reasoner.taxonomy.model.AnonymousNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.FreshInstanceNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.FreshTaxonomyNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.FreshTypeNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.InstanceNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.Node;
-import org.semanticweb.elk.reasoner.taxonomy.model.TaxonomyNode;
-import org.semanticweb.elk.reasoner.taxonomy.model.TypeNode;
+import org.semanticweb.elk.reasoner.taxonomy.model.*;
 import org.semanticweb.elk.util.concurrent.computation.ComputationExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The class for querying the results of the reasoning tasks for a given
@@ -64,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * {@link ElkAxiom}s (methods addAxiom() and removeAxiom()). When querying the
  * results of the reasoning tasks, the reasoner will ensure that all necessary
  * reasoning stages, such as consistency checking, are performed.
- * 
+ *
  * Reasoners are created (and pre-configured) by the {@link ReasonerFactory}.
  */
 public class Reasoner extends AbstractReasonerState {
@@ -115,13 +103,13 @@ public class Reasoner extends AbstractReasonerState {
 		this.progressMonitor = new DummyProgressMonitor();
 		this.allowFreshEntities = true;
 
-		LOGGER_.info("ELK reasoner was created");
+		LOGGER_.debug("ELK reasoner was created");
 	}
 
 	/**
 	 * Set the progress monitor that will be used for reporting progress on all
 	 * potentially long-running operations.
-	 * 
+	 *
 	 * @param progressMonitor
 	 */
 	public synchronized void setProgressMonitor(ProgressMonitor progressMonitor) {
@@ -134,7 +122,7 @@ public class Reasoner extends AbstractReasonerState {
 	 * ontology. If false, a {@link ElkFreshEntitiesException} will be thrown in
 	 * such cases. If true, the reasoner will answer as if the entity had been
 	 * declared (but not used in any axiom).
-	 * 
+	 *
 	 * @param allow
 	 */
 	public synchronized void setAllowFreshEntities(boolean allow) {
@@ -144,7 +132,7 @@ public class Reasoner extends AbstractReasonerState {
 	/**
 	 * Get whether fresh entities are allowed. See
 	 * {@link #setAllowFreshEntities(boolean)} for details.
-	 * 
+	 *
 	 * @return {@code true} if fresh entities are allowed
 	 */
 	public synchronized boolean getAllowFreshEntities() {
@@ -158,7 +146,7 @@ public class Reasoner extends AbstractReasonerState {
 
 	/**
 	 * Sets the number of working threads. Shouldn't be used during reasoning.
-	 * 
+	 *
 	 * @param workerNo
 	 */
 	public synchronized void setNumberOfWorkers(int workerNo) {
@@ -168,7 +156,7 @@ public class Reasoner extends AbstractReasonerState {
 	/**
 	 * This supposed to be the central place where the reasoner gets its
 	 * configuration options
-	 * 
+	 *
 	 * @param config
 	 */
 	public synchronized void setConfigurationOptions(
@@ -209,7 +197,7 @@ public class Reasoner extends AbstractReasonerState {
 
 	/**
 	 * Tries to shut down the reasoner within the specified time
-	 * 
+	 *
 	 * @param timeout
 	 *            the maximum time to wait
 	 * @param unit
@@ -227,7 +215,7 @@ public class Reasoner extends AbstractReasonerState {
 		boolean success = executor_.isShutdown();
 		executor_ = null;
 		if (success) {
-			LOGGER_.info("ELK reasoner has shut down");
+			LOGGER_.debug("reasoner has shut down");
 		} else {
 			LOGGER_.error("ELK reasoner failed to shut down!");
 		}

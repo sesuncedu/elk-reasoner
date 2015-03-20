@@ -25,15 +25,6 @@ package org.semanticweb.elk.reasoner.incremental;
  * #L%
  */
 
-import static org.junit.Assume.assumeTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +41,15 @@ import org.semanticweb.elk.util.collections.Operations;
 import org.semanticweb.elk.util.logging.LogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Pavel Klinov
@@ -141,7 +141,7 @@ public abstract class BaseIncrementalReasoningCorrectnessTest<T, EO extends Test
 			applyChanges(incrementalReasoner, changingAxioms.getOnElements(),
 					IncrementalChangeType.DELETE);
 
-			LOGGER_.info("===DELETIONS===");
+			LOGGER_.debug("===DELETIONS===");
 
 			correctnessCheck(standardReasoner, incrementalReasoner, seed);
 
@@ -151,7 +151,7 @@ public abstract class BaseIncrementalReasoningCorrectnessTest<T, EO extends Test
 			applyChanges(incrementalReasoner, changingAxioms.getOnElements(),
 					IncrementalChangeType.ADD);
 
-			LOGGER_.info("===ADDITIONS===");
+			LOGGER_.debug("===ADDITIONS===");
 
 			correctnessCheck(standardReasoner, incrementalReasoner, seed);
 		}

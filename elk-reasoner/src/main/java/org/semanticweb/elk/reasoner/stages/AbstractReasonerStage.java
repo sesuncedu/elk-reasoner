@@ -22,17 +22,17 @@
  */
 package org.semanticweb.elk.reasoner.stages;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.reasoner.ProgressMonitor;
 import org.semanticweb.elk.reasoner.saturation.SaturationStatistics;
 import org.semanticweb.elk.reasoner.saturation.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * A common implementation of {@link ReasonerStage}s for a given reasoner.
@@ -176,10 +176,10 @@ abstract class AbstractReasonerStage implements ReasonerStage {
 
 	@Override
 	public void execute() throws ElkException {
-		if (LOGGER_.isInfoEnabled())
-			LOGGER_.info(getName() + " using " + workerNo + " workers");
+		if (LOGGER_.isDebugEnabled())
+			LOGGER_.debug(getName() + " using " + workerNo + " workers");
 		if (LOGGER_.isTraceEnabled())
-			LOGGER_.info("=== " + getName() + " using " + workerNo + " workers"
+			LOGGER_.trace("=== " + getName() + " using " + workerNo + " workers"
 					+ " ===");
 		progressMonitor.start(getName());
 
@@ -260,4 +260,5 @@ abstract class AbstractReasonerStage implements ReasonerStage {
 	protected SaturationStatistics getRuleAndConclusionStatistics() {
 		return reasoner.ruleAndConclusionStats;
 	}
+
 }

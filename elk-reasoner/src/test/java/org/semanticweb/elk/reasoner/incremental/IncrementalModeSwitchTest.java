@@ -25,15 +25,6 @@ package org.semanticweb.elk.reasoner.incremental;
  * #L%
  */
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 import org.semanticweb.elk.owl.exceptions.ElkException;
 import org.semanticweb.elk.owl.implementation.ElkObjectFactoryImpl;
@@ -52,6 +43,17 @@ import org.semanticweb.elk.reasoner.TestReasonerUtils;
 import org.semanticweb.elk.reasoner.stages.LoggingStageExecutor;
 import org.semanticweb.elk.reasoner.stages.PostProcessingStageExecutor;
 import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A collections of low-level tests to check dynamic disallowing of the
@@ -64,8 +66,9 @@ import org.semanticweb.elk.reasoner.taxonomy.model.Taxonomy;
 public class IncrementalModeSwitchTest {
 
 	final ElkObjectFactory objectFactory = new ElkObjectFactoryImpl();
+    private Logger LOGGER = LoggerFactory.getLogger(IncrementalModeSwitchTest.class);
 
-	@Test
+    @Test
 	public void testAddedTransitivity() throws ElkException {
 		TestChangesLoader loader = new TestChangesLoader();
 		Reasoner reasoner = TestReasonerUtils.createTestReasoner(loader,
@@ -134,7 +137,7 @@ public class IncrementalModeSwitchTest {
 		assertFalse(reasoner.isInconsistent());
 		reasoner.getTaxonomy();
 
-		System.out.println("===========================================");
+		LOGGER.debug("===========================================");
 
 		reasoner.setAllowIncrementalMode(true);
 
